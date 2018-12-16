@@ -527,32 +527,42 @@ ps: `__metaclass__`是创建类时起作用.所以我们可以分别使用`__met
 
 ```python
 class Singleton(object):
-    def __new__(cls, *args, **kw):
-        if not hasattr(cls, '_instance'):
-            orig = super(Singleton, cls)
-            cls._instance = orig.__new__(cls, *args, **kw)
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, "_instance"):
+            cls._instance = object.__new__(cls, *args, **kwargs)
+
         return cls._instance
 
 class MyClass(Singleton):
     a = 1
 ```
 
-### 2 共享属性
+#### 2. 使用模块
 
-创建实例时把所有实例的`__dict__`指向同一个字典,这样它们具有相同的属性和方法.
+其实，**Python 的模块就是天然的单例模式**，因为模块在第一次导入时，会生成 `.pyc` 文件，当第二次导入时，就会直接加载 `.pyc` 文件，而不会再次执行模块代码。因此，我们只需把相关的函数和数据定义在一个模块中，就可以获得一个单例对象了。如果我们真的想要一个单例类，可以考虑这样做：
 
 ```python
-
-class Borg(object):
-    _state = {}
-    def __new__(cls, *args, **kw):
-        ob = super(Borg, cls).__new__(cls, *args, **kw)
-        ob.__dict__ = cls._state
-        return ob
-
-class MyClass2(Borg):
-    a = 1
+# mysingleton.py
+class My_Singleton(object):
+    def foo(self):
+        pass
+ 
+my_singleton = My_Singleton()
 ```
+
+将上面的代码保存在文件 `mysingleton.py` 中，然后这样使用：
+
+在其他模块中导入
+
+```python
+from mysingleton import my_singleton
+ 
+my_singleton.foo()
+```
+
+
 
 ### 3 装饰器版本
 
